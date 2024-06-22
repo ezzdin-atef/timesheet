@@ -9,7 +9,6 @@ import {
 import { TableCell, TableRow } from "@/components/ui/table";
 import { WorkItemsList } from "@/database/work-items";
 import { PencilRuler, Trash2 } from "lucide-react";
-import React from "react";
 import TimesheetForm from "./TimesheetForm";
 
 interface TimesheetTableViewProps {

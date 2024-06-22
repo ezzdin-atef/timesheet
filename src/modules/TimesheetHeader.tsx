@@ -17,7 +17,6 @@ import {
 import { ProjectsList } from "@/database/projects";
 import TimesheetForm from "@/modules/TimesheetForm";
 import { Download, FilterX, Grid3X3, Plus, TableRowsSplit } from "lucide-react";
-import React from "react";
 import { DateRange } from "react-day-picker";
 
 interface TimesheetHeaderProps {

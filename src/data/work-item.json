@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "taskDescription": "Task 1",
+    "date": "2024-06-18",
+    "assignedBy": "John Doe",
+    "duration": 0.5,
+    "projectID": "1"
+  },
+  {
+    "id": "2",
+    "taskDescription": "Task 2",
+    "date": "2024-06-18",
+    "assignedBy": "John Doe",
+    "duration": 0.5,
+    "projectID": "1"
+  },
+  {
+    "id": "3",
+    "taskDescription": "Task 3",
+    "date": "2024-06-19",
+    "assignedBy": "John Doe",
+    "duration": 0.5,
+    "projectID": "1"
+  },
+  {
+    "id": "4",
+    "taskDescription": "Task 4",
+    "date": "2024-06-20",
+    "assignedBy": "John Doe",
+    "duration": 0.5,
+    "projectID": "1"
+  },
+  {
+    "id": "5",
+    "taskDescription": "Task 5",
+    "date": "2024-06-21",
+    "assignedBy": "John Doe",
+    "duration": 1,
+    "projectID": "1"
+  }
+]

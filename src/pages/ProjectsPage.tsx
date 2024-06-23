@@ -15,7 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ProjectsList, getProjects } from "@/database/projects";
+import { useToast } from "@/components/ui/use-toast";
+import { ProjectsList, deleteProject, getProjects } from "@/database/projects";
 import { WorkItemsList, getWorkItems } from "@/database/work-items";
 import { filterWorkItemsByRange } from "@/helpers/filterWorkItemsByRange";
 import ProjectForm from "@/modules/ProjectForm";
@@ -30,18 +31,35 @@ export default function ProjectsPage() {
   const [dateRange, setDateRange] = React.useState<DateRange | null>(null);
   const [projects, setProjects] = React.useState<ProjectsWithDuration[]>([]);
   const [workItems, setWorkItems] = React.useState<WorkItemsList[]>([]);
+  const { toast } = useToast();
 
   // Hanlde delete project
-  const handleDelete = (id: string) => {
-    console.log(id);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteProject(id);
+      toast({
+        title: "Project Deleted",
+        description: "Project has been deleted successfully",
+      });
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later...",
+      });
+    }
   };
 
   // Fetch Projects
   useEffect(() => {
-    getProjects().then((projects) =>
-      setProjects(projects.map((project) => ({ ...project, duration: 0 })))
-    );
-    getWorkItems().then(setWorkItems);
+    getProjects().then((res) => {
+      if (res.status) {
+        setProjects(res.data.map((project) => ({ ...project, duration: 0 })));
+      }
+    });
+    getWorkItems().then((res) => {
+      if (res.status) setWorkItems(res.data);
+    });
   }, []);
 
   // Filter Data by Date Range if selected and if not show all

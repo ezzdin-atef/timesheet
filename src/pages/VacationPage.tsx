@@ -15,7 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { VacationList, getVacation } from "@/database/vacation";
+import { useToast } from "@/components/ui/use-toast";
+import { VacationList, deleteVacation, getVacation } from "@/database/vacation";
 import VacationForm from "@/modules/VacationForm";
 import { PencilRuler, Plus, Trash2 } from "lucide-react";
 import React, { useEffect } from "react";
@@ -25,15 +26,30 @@ export default function VacationsPage() {
   const [data, setData] = React.useState<VacationList[]>([]);
   const [dateRange, setDateRange] = React.useState<DateRange | null>(null);
   const [vacations, setVacations] = React.useState<VacationList[]>([]);
+  const { toast } = useToast();
 
   // Handle Delete Records
-  const handleDelete = (id: string) => {
-    console.log(id);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteVacation(id);
+      toast({
+        title: "Vacation Deleted",
+        description: "Vacation has been deleted successfully",
+      });
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later...",
+      });
+    }
   };
 
   // Fetch Data
   useEffect(() => {
-    getVacation().then(setVacations);
+    getVacation().then((res) => {
+      if (res.status) setVacations(res.data);
+    });
   }, []);
 
   // Set Data

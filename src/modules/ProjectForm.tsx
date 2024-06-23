@@ -8,6 +8,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import { addProject, updateProject } from "@/database/projects";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
@@ -30,6 +31,7 @@ interface ProjectFormProps {
 }
 
 export default function ProjectForm(props: ProjectFormProps) {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,22 +43,41 @@ export default function ProjectForm(props: ProjectFormProps) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (props.id) {
-      // Update the record.
-      await updateProject({
-        id: props.id,
-        name: values.name,
-        code: values.code,
-        df: values.df,
-        description: values.description,
-      });
-    } else {
-      // Add a new record.
-      await addProject({
-        name: values.name,
-        code: values.code,
-        df: values.df,
-        description: values.description,
+    try {
+      if (props.id) {
+        // Update the record.
+        await updateProject({
+          id: props.id,
+          name: values.name,
+          code: values.code,
+          df: values.df,
+          description: values.description,
+        });
+
+        toast({
+          title: "Project Updated",
+          description: "Project has been updated successfully",
+        });
+      } else {
+        // Add a new record.
+        await addProject({
+          name: values.name,
+          code: values.code,
+          df: values.df,
+          description: values.description,
+        });
+
+        toast({
+          title: "Project Added",
+          description: "Project has been added successfully",
+        });
+      }
+
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later...",
       });
     }
   }

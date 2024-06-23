@@ -1,5 +1,13 @@
-import projectsJson from "@/data/projects.json";
-import workItemsJson from "@/data/work-item.json";
+import { db } from "@/config/firebase";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
+import { getProjects } from "./projects";
 
 export type WorkItemDuration = 0 | 0.25 | 0.5 | 0.75 | 1;
 
@@ -16,34 +24,96 @@ export interface WorkItemsList {
 }
 
 export async function getWorkItems() {
-  const data = workItemsJson.map((item) => {
-    const project = projectsJson.find(
-      (project) => project.id === item.projectID
-    );
-    if (!project) {
-      throw new Error(`Project with code ${item.projectID} not found`);
-    }
+  try {
+    const workItemsList: WorkItemsList[] = [];
+
+    const querySnapshot = await getDocs(collection(db, "work-items"));
+    const projects = await getProjects();
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const project = projects.data.find(
+        (project) => project.id === data.projectID
+      );
+
+      if (!project) return;
+
+      workItemsList.push({
+        id: doc.id,
+        taskDescription: data.taskDescription,
+        date: new Date(data.date.toDate()),
+        assignedBy: data.assignedBy,
+        duration: data.duration,
+        projectName: project.name,
+        projectCode: project.code,
+        projectDF: project.df,
+        projectID: project.id,
+      });
+    });
 
     return {
-      ...item,
-      date: new Date(item.date),
-      projectName: project.name,
-      projectCode: project.code,
-      projectDF: project.df,
+      status: 1,
+      data: workItemsList,
     };
-  });
-
-  return data as WorkItemsList[];
+  } catch (error) {
+    return {
+      status: 0,
+      message: error,
+      data: [],
+    };
+  }
 }
 
 export async function addWorkItem(
   data: Omit<WorkItemsList, "id" | "projectName" | "projectCode" | "projectDF">
 ) {
-  return data;
+  try {
+    await addDoc(collection(db, "work-items"), data);
+    return {
+      status: 1,
+    };
+  } catch (error) {
+    return {
+      status: 0,
+      message: error,
+    };
+  }
 }
 
 export async function updateWorkItem(
   data: Omit<WorkItemsList, "projectName" | "projectCode" | "projectDF">
 ) {
-  return data;
+  try {
+    await updateDoc(doc(db, "work-items", data.id), {
+      taskDescription: data.taskDescription,
+      date: data.date,
+      assignedBy: data.assignedBy,
+      duration: data.duration,
+      projectID: data.projectID,
+    });
+    return {
+      status: 1,
+    };
+  } catch (error) {
+    return {
+      status: 0,
+      message: error,
+    };
+  }
+}
+
+export async function deleteWorkItem(id: string) {
+  try {
+    const docRef = doc(db, "work-items", id);
+    await deleteDoc(docRef);
+
+    return {
+      status: 1,
+    };
+  } catch (error) {
+    return {
+      status: 0,
+      message: error,
+    };
+  }
 }

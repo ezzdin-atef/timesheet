@@ -8,6 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useToast } from "@/components/ui/use-toast";
 import { VacationType, addVacation, updateVacation } from "@/database/vacation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
@@ -28,6 +29,7 @@ interface VacationFormProps {
 }
 
 export default function VacationForm(props: VacationFormProps) {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,16 +39,33 @@ export default function VacationForm(props: VacationFormProps) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (props.id) {
-      await updateVacation({
-        id: props.id,
-        type: values.type as VacationType,
-        date: values.date,
-      });
-    } else {
-      await addVacation({
-        type: values.type as VacationType,
-        date: values.date,
+    try {
+      if (props.id) {
+        await updateVacation({
+          id: props.id,
+          type: values.type as VacationType,
+          date: values.date,
+        });
+        toast({
+          title: "Vacation Updated",
+          description: "Vacation has been updated successfully",
+        });
+      } else {
+        await addVacation({
+          type: values.type as VacationType,
+          date: values.date,
+        });
+        toast({
+          title: "Vacation Added",
+          description: "Vacation has been added successfully",
+        });
+      }
+
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later...",
       });
     }
   }

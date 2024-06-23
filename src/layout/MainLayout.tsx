@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Toaster } from "@/components/ui/toaster";
 import { CircleUser, Menu, Package2 } from "lucide-react";
 import { Outlet } from "react-router-dom";
 
@@ -89,6 +90,7 @@ export default function MainLayout(props: MainLayoutProps) {
       </header>
       <main className="flex-1 px-5">
         <Outlet />
+        <Toaster />
       </main>
     </div>
   );

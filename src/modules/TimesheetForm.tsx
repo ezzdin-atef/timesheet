@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import { ProjectsList, getProjects } from "@/database/projects";
 import {
   WorkItemDuration,
@@ -24,7 +25,7 @@ const formSchema = z.object({
   taskDescription: z.string().min(3).max(255),
   date: z.date(),
   assignedBy: z.string().min(3).max(255),
-  duration: z.number().min(0).max(1),
+  duration: z.string().regex(/^(0|0\.25|0\.5|0\.75|1)$/),
   projectId: z.string().min(1, {
     message: "Please select a project",
   }),
@@ -40,6 +41,7 @@ interface TimesheetFormProps {
 }
 
 export default function TimesheetForm(props: TimesheetFormProps) {
+  const { toast } = useToast();
   const [projects, setProjects] = React.useState<ProjectsList[]>([]);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,34 +49,55 @@ export default function TimesheetForm(props: TimesheetFormProps) {
       taskDescription: "",
       date: new Date(),
       assignedBy: "",
-      duration: 0,
+      duration: "0",
       projectId: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (props.id) {
-      await updateWorkItem({
-        id: props.id,
-        taskDescription: values.taskDescription,
-        date: values.date,
-        assignedBy: values.assignedBy,
-        duration: values.duration as WorkItemDuration,
-        projectID: values.projectId,
-      });
-    } else {
-      await addWorkItem({
-        taskDescription: values.taskDescription,
-        date: values.date,
-        assignedBy: values.assignedBy,
-        duration: values.duration as WorkItemDuration,
-        projectID: values.projectId,
+    try {
+      if (props.id) {
+        await updateWorkItem({
+          id: props.id,
+          taskDescription: values.taskDescription,
+          date: values.date,
+          assignedBy: values.assignedBy,
+          duration: parseFloat(values.duration) as WorkItemDuration,
+          projectID: values.projectId,
+        });
+
+        toast({
+          title: "Work Item Updated",
+          description: "Work Item has been updated successfully",
+        });
+      } else {
+        await addWorkItem({
+          taskDescription: values.taskDescription,
+          date: values.date,
+          assignedBy: values.assignedBy,
+          duration: parseFloat(values.duration) as WorkItemDuration,
+          projectID: values.projectId,
+        });
+
+        toast({
+          title: "Work Item Added",
+          description: "Work Item has been added successfully",
+        });
+      }
+
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later...",
       });
     }
   }
 
   useEffect(() => {
-    getProjects().then(setProjects);
+    getProjects().then((res) => {
+      if (res.status) setProjects(res.data);
+    });
   }, []);
 
   useEffect(() => {
@@ -83,7 +106,7 @@ export default function TimesheetForm(props: TimesheetFormProps) {
         taskDescription: props.taskDescription!,
         date: props.date!,
         assignedBy: props.assignedBy!,
-        duration: props.duration!,
+        duration: props.duration!.toString(),
         projectId: props.projectId!,
       });
   }, [props.id]);

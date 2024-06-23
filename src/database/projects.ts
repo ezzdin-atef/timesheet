@@ -1,4 +1,12 @@
-import projectsJson from "@/data/projects.json";
+import { db } from "@/config/firebase";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
 
 export interface ProjectsList {
   id: string;
@@ -9,13 +17,80 @@ export interface ProjectsList {
 }
 
 export async function getProjects() {
-  return projectsJson as ProjectsList[];
+  try {
+    const projectsList: ProjectsList[] = [];
+
+    const querySnapshot = await getDocs(collection(db, "projects"));
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      projectsList.push({
+        id: doc.id,
+        name: data.name,
+        code: data.code,
+        description: data.description,
+        df: data.df,
+      });
+    });
+
+    return {
+      status: 1,
+      data: projectsList,
+    };
+  } catch (error) {
+    return {
+      status: 0,
+      message: error,
+      data: [],
+    };
+  }
 }
 
 export async function addProject(data: Omit<ProjectsList, "id">) {
-  return data;
+  try {
+    await addDoc(collection(db, "projects"), data);
+    return {
+      status: 1,
+    };
+  } catch (error) {
+    return {
+      status: 0,
+      message: error,
+    };
+  }
 }
 
 export async function updateProject(data: ProjectsList) {
-  return data;
+  try {
+    await updateDoc(doc(db, "projects", data.id), {
+      name: data.name,
+      code: data.code,
+      description: data.description,
+      df: data.df,
+    });
+    return {
+      status: 1,
+    };
+  } catch (error) {
+    return {
+      status: 0,
+      message: error,
+    };
+  }
+}
+
+export async function deleteProject(id: string) {
+  try {
+    const docRef = doc(db, "projects", id);
+    await deleteDoc(docRef);
+
+    return {
+      status: 1,
+    };
+  } catch (error) {
+    return {
+      status: 0,
+      message: error,
+    };
+  }
 }

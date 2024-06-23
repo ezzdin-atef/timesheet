@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { CACHE_SIZE_UNLIMITED, initializeFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -14,3 +15,8 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
+
+export const db = initializeFirestore(app, {
+  ignoreUndefinedProperties: true,
+  cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+});

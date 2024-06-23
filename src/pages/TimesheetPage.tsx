@@ -5,9 +5,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/components/ui/use-toast";
 import { ProjectsList, getProjects } from "@/database/projects";
 import { VacationList, getVacation } from "@/database/vacation";
-import { WorkItemsList, getWorkItems } from "@/database/work-items";
+import {
+  WorkItemsList,
+  deleteWorkItem,
+  getWorkItems,
+} from "@/database/work-items";
 import { filterWorkItemsByRange } from "@/helpers/filterWorkItemsByRange";
 import { splitTimesheetByDate } from "@/helpers/splitTimesheetByDate";
 import TimesheetHeader from "@/modules/TimesheetHeader";
@@ -29,10 +34,24 @@ export default function TimesheetPage() {
   const [selectedProject, setSelectedProject] = React.useState<
     string | undefined
   >(undefined);
+  const { toast } = useToast();
 
   // Handle Delete Records
-  const handleDelete = (id: string) => {
-    console.log(id);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteWorkItem(id);
+      toast({
+        title: "Work Item Deleted",
+        description: "Work Item has been deleted successfully",
+      });
+
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later...",
+      });
+    }
   };
 
   // Switch View between List and Splitted
@@ -47,9 +66,15 @@ export default function TimesheetPage() {
 
   // Fetch Data
   useEffect(() => {
-    getWorkItems().then(setWorkItems);
-    getProjects().then(setProjects);
-    getVacation().then(setVacations);
+    getWorkItems().then((res) => {
+      if (res.status) setWorkItems(res.data);
+    });
+    getProjects().then((res) => {
+      if (res.status) setProjects(res.data);
+    });
+    getVacation().then((res) => {
+      if (res.status) setVacations(res.data);
+    });
   }, [selectedProject]);
 
   // Filter Data by Date Range and Selected Project for List View

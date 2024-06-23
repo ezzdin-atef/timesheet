@@ -11,7 +11,8 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { VacationType, addVacation, updateVacation } from "@/database/vacation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -29,7 +30,6 @@ interface VacationFormProps {
 }
 
 export default function VacationForm(props: VacationFormProps) {
-  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,9 +37,12 @@ export default function VacationForm(props: VacationFormProps) {
       date: new Date(),
     },
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { toast } = useToast();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      setIsLoading(true);
       if (props.id) {
         await updateVacation({
           id: props.id,
@@ -67,6 +70,7 @@ export default function VacationForm(props: VacationFormProps) {
         title: "Something went wrong",
         description: "Please try again later...",
       });
+      setIsLoading(false);
     }
   }
 
@@ -116,7 +120,10 @@ export default function VacationForm(props: VacationFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isLoading ? "Loading..." : "Submit"}
+        </Button>
       </form>
     </Form>
   );

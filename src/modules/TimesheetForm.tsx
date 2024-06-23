@@ -17,7 +17,8 @@ import {
   updateWorkItem,
 } from "@/database/work-items";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -41,7 +42,6 @@ interface TimesheetFormProps {
 }
 
 export default function TimesheetForm(props: TimesheetFormProps) {
-  const { toast } = useToast();
   const [projects, setProjects] = React.useState<ProjectsList[]>([]);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,9 +53,12 @@ export default function TimesheetForm(props: TimesheetFormProps) {
       projectId: "",
     },
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { toast } = useToast();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      setIsLoading(true);
       if (props.id) {
         await updateWorkItem({
           id: props.id,
@@ -91,6 +94,7 @@ export default function TimesheetForm(props: TimesheetFormProps) {
         title: "Something went wrong",
         description: "Please try again later...",
       });
+      setIsLoading(false);
     }
   }
 
@@ -198,7 +202,10 @@ export default function TimesheetForm(props: TimesheetFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isLoading ? "Loading..." : "Submit"}
+        </Button>
       </form>
     </Form>
   );

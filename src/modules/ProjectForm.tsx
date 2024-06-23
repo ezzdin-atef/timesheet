@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { addProject, updateProject } from "@/database/projects";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -31,7 +32,6 @@ interface ProjectFormProps {
 }
 
 export default function ProjectForm(props: ProjectFormProps) {
-  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,9 +41,12 @@ export default function ProjectForm(props: ProjectFormProps) {
       description: "",
     },
   });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { toast } = useToast();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      setIsLoading(true);
       if (props.id) {
         // Update the record.
         await updateProject({
@@ -79,6 +82,7 @@ export default function ProjectForm(props: ProjectFormProps) {
         title: "Something went wrong",
         description: "Please try again later...",
       });
+      setIsLoading(false);
     }
   }
 
@@ -147,7 +151,10 @@ export default function ProjectForm(props: ProjectFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {isLoading ? "Loading..." : "Submit"}
+        </Button>
       </form>
     </Form>
   );

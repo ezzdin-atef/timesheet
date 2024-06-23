@@ -7,8 +7,8 @@ export default function DashboardPage() {
   const [numberOfProjects, setNumberOfProjects] = React.useState<number>(0);
 
   useEffect(() => {
-    getProjects().then((projects) => {
-      setNumberOfProjects(projects.length);
+    getProjects().then((res) => {
+      setNumberOfProjects(res.data.length);
     });
   }, []);
 

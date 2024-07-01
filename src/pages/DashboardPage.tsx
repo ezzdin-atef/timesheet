@@ -1,14 +1,22 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getProjects } from "@/database/projects";
+import { getVacation } from "@/database/vacation";
 import { FolderGit2, TentTree } from "lucide-react";
 import React, { useEffect } from "react";
 
 export default function DashboardPage() {
   const [numberOfProjects, setNumberOfProjects] = React.useState<number>(0);
+  const [numberOfAnnualRemaining, setNumberOfAnnualRemaining] =
+    React.useState<number>(0);
 
   useEffect(() => {
     getProjects().then((res) => {
       setNumberOfProjects(res.data.length);
+    });
+
+    getVacation().then((res) => {
+      const count = res.data.filter((el) => el.type === "annual").length;
+      setNumberOfAnnualRemaining(21 - count);
     });
   }, []);
 
@@ -23,7 +31,7 @@ export default function DashboardPage() {
             <TentTree className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">21</div>
+            <div className="text-2xl font-bold">{numberOfAnnualRemaining}</div>
           </CardContent>
         </Card>
         <Card x-chunk="dashboard-01-chunk-0">

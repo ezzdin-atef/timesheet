@@ -51,6 +51,11 @@ export async function getWorkItems() {
       });
     });
 
+
+
+
+    workItemsList.sort((a, b) => b.date.getTime() - a.date.getTime());
+
     return {
       status: 1,
       data: workItemsList,

@@ -10,7 +10,7 @@ const firebaseConfig = {
   storageBucket: "rtimesheet-73195.appspot.com",
   messagingSenderId: "746113993629",
   appId: "1:746113993629:web:e7dfb423a565aee857fd74",
-  measurementId: "G-PF7PDNZLKZ",
+  measurementId: "G-PF7PDNZLKZ"
 };
 
 // Initialize Firebase
@@ -20,3 +20,5 @@ export const db = initializeFirestore(app, {
   ignoreUndefinedProperties: true,
   cacheSizeBytes: CACHE_SIZE_UNLIMITED,
 });
+
+

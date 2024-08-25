@@ -21,13 +21,28 @@ import TimesheetTableView from "@/modules/TimesheetTableView";
 import React, { useEffect } from "react";
 import { DateRange } from "react-day-picker";
 
+const today = new Date();
+
+const defaultDateValue = {
+  from: new Date(
+      today.getFullYear(),
+      today.getDate() < 22 ? today.getMonth() - 1 : today.getMonth(),
+      22
+  ),
+  to: new Date(
+      today.getFullYear(),
+      today.getDate() < 22 ? today.getMonth() : today.getMonth() + 1,
+      21
+  ),
+}
+
 export default function TimesheetPage() {
   const [data, setData] = React.useState<WorkItemsList[]>([]);
   const [splitedData, setSplitedData] = React.useState<{
     [key: string]: WorkItemsList[];
   }>({});
   const [view, setView] = React.useState<"list" | "splitted">("list");
-  const [dateRange, setDateRange] = React.useState<DateRange | null>(null);
+  const [dateRange, setDateRange] = React.useState<DateRange | null>(defaultDateValue);
   const [projects, setProjects] = React.useState<ProjectsList[]>([]);
   const [workItems, setWorkItems] = React.useState<WorkItemsList[]>([]);
   const [vacations, setVacations] = React.useState<VacationList[]>([]);
@@ -63,6 +78,41 @@ export default function TimesheetPage() {
   const resetFilters = () => {
     setSelectedProject(undefined);
   };
+
+  const moveToNextMonth = () => {
+    if (!dateRange || !dateRange.from || !dateRange.to) return;
+    const newDateRange = {
+      from: new Date(
+          dateRange.from!.getFullYear(),
+          dateRange.from.getMonth() + 1,
+          dateRange.from.getDate()
+      ),
+      to: new Date(
+          dateRange.to.getFullYear(),
+          dateRange.to.getMonth() + 1,
+          dateRange.to.getDate()
+      ),
+    };
+    console.log("Updated to next month", dateRange, newDateRange)
+    setDateRange(newDateRange);
+  }
+
+  const moveToPrevMonth = () => {
+    if (!dateRange || !dateRange.from || !dateRange.to) return;
+    const newDateRange = {
+      from: new Date(
+          dateRange.from!.getFullYear(),
+          dateRange.from.getMonth() - 1,
+          dateRange.from.getDate()
+      ),
+      to: new Date(
+          dateRange.to.getFullYear(),
+          dateRange.to.getMonth() - 1,
+          dateRange.to.getDate()
+      ),
+    };
+    setDateRange(newDateRange);
+  }
 
   // Fetch Data
   useEffect(() => {
@@ -108,6 +158,8 @@ export default function TimesheetPage() {
     setSplitedData(splitedData);
   }, [dateRange, selectedProject, workItems]);
 
+
+  console.log("dateRange", dateRange)
   return (
     <div>
       <TimesheetHeader
@@ -115,9 +167,15 @@ export default function TimesheetPage() {
         resetFilters={resetFilters}
         projects={projects}
         selectedProject={selectedProject}
-        setDateRange={setDateRange}
+        setDateRange={(date: DateRange) => {
+          console.log("updating date range", date);
+          setDateRange(date);
+        }}
         setSelectedProject={setSelectedProject}
         view={view}
+        dateRange={dateRange}
+        moveToPrevMonth={moveToPrevMonth}
+        moveToNextMonth={moveToNextMonth}
       />
       <Table>
         <TableHeader>

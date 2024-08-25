@@ -36,6 +36,7 @@ export async function getWorkItems() {
         (project) => project.id === data.projectID
       );
 
+
       if (!project) return;
 
       workItemsList.push({
